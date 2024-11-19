@@ -1,24 +1,29 @@
 import Router from 'router'
 import addonInterface from "./addon.js"
-import landingTemplate from "./lib/util/landingTemplate.js"
 import StreamProvider from './lib/stream-provider.js'
 import { decode } from 'urlencode'
 import qs from 'querystring'
 import { getManifest } from './lib/util/manifest.js'
 import { parseConfiguration } from './lib/util/configuration.js'
 import { BadTokenError, BadRequestError, AccessDeniedError } from './lib/util/error-codes.js'
+import { fileURLToPath } from 'url';
+import path from 'path';
+import ejs from 'ejs';
 
 const router = new Router();
 
 router.get('/', (_, res) => {
+    console.log("TEST")
     res.redirect('/configure')
 })
 
 router.get('/:configuration?/configure', (req, res) => {
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = path.dirname(__filename);
+
+    const file = path.join(__dirname, 'template', 'index.ejs')
     const config = parseConfiguration(req.params.configuration)
-    const landingHTML = landingTemplate(addonInterface.manifest, config)
-    res.setHeader('content-type', 'text/html')
-    res.end(landingHTML)
+    ejs.renderFile(file, { config: config, manifest: addonInterface.manifest }).then(rendered => res.end(rendered))
 })
 
 router.get('/:configuration?/manifest.json', (req, res) => {
@@ -87,7 +92,9 @@ function handleError(err, res) {
 }
 
 export default function (req, res) {
-    router(req, res, function () {
+    router(req, res, function (err) {
+        console.log("ERROR")
+        console.log(JSON.stringify(err))
         res.statusCode = 404;
         res.end();
     });

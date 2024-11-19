@@ -34,9 +34,11 @@ const rateLimiter = rateLimit({
 })
 app.use(rateLimiter)
 
+const port = process.env.PORT || 55771;
+
 app.use((req, res, next) => serverless(req, res, next))
-app.listen(process.env.PORT || 55771, () => {
-    console.log(`Started addon at: http://127.0.0.1:${process.env.PORT || 55771}`)
+app.listen(port, () => {
+    console.log(`Started addon at: http://127.0.0.1:${port}`)
 })
 
 // https://stremio.github.io/stremio-publish-addon/index.html
