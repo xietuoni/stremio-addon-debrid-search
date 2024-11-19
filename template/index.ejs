@@ -189,6 +189,39 @@
     .full-width {
       width: 100%;
     }
+
+    .selectBox {
+      position: relative;
+    }
+
+    .overSelect {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      bottom: 0;
+    }
+
+    #checkboxes {
+      display: none;
+      border: 1px #dadada solid;
+    }
+
+    #checkboxes label {
+      display: block;
+    }
+
+    #checkboxes label:hover {
+      background-color: #1e90ff;
+    }
+
+    input[type=checkbox] {
+      display: none;
+    }
+
+    input:checked+label {
+      background-color: #1e90ff;
+    }
   </style>
   <script src="https://code.jquery.com/jquery-3.7.1.slim.min.js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/purecss@2.1.0/build/pure-min.css"
@@ -218,16 +251,6 @@
 
     <div class="separator"></div>
 
-    <h3 class="gives">Get the API Key here:</h3>
-    <ul>
-      <li><a href="https://real-debrid.com/apitoken" target="_blank">RealDebrid API Key</a></li>
-      <li><a href="https://debrid-link.fr/webapp/apikey" target="_blank">DebridLink API Key</a></li>
-      <li><a href="https://alldebrid.com/apikeys" target="_blank">AllDebrid API Key</a></li>
-      <li><a href="https://www.premiumize.me/account" target="_blank">Premiumize API Key</a></li>
-    </ul>
-
-    <div class="separator"></div>
-
     <form class="pure-form" id="mainForm">
       <div class="form-element">
         <div class="label-to-top">Debrid Provider</div>
@@ -239,8 +262,38 @@
         </select>
       </div>
       <div class="form-element">
-        <div class="label-to-top">Debrid API Key</div>
+        <div class="label-to-top">Debrid API Key -
+          <a id="apiKeyLink" href="https://real-debrid.com/apitoken" target="_blank">Get It Here</a>
+        </div>
         <input type="text" id="DebridApiKey" name="DebridApiKey" class="full-width" required>
+      </div>
+      <div class="form-element">
+        <div class="label-to-top">TMDB API Key -
+          <a id="apiKeyLink" href="https://www.themoviedb.org/settings/api" target="_blank">Get It Here</a>
+        </div>
+        <input type="text" id="TMDBApiKey" name="TMDBApiKey" class="full-width">
+      </div>
+
+      <div class="form-element">
+        <div class="label-to-top">Additional languages (requires TMDB API KEY)</div>
+        <div class="multiselect">
+          <div class="selectBox">
+            <select class="full-width">
+              <option>Additional languages</option>
+            </select>
+            <div class="overSelect"></div>
+          </div>
+          <div id="checkboxes">
+            <div>
+              <input type="checkbox" id="one" />
+              <label for="one"> First checkbox</label>
+            </div>
+            <div>
+              <input type="checkbox" id="two" />
+              <label for="two"> Second checkbox</label>
+            </div>
+          </div>
+        </div>
       </div>
     </form>
 
@@ -253,8 +306,49 @@
   </div>
   <script>
 
+    // Pre-populate from config 
     $('#DebridProvider option[value="<%- config.DebridProvider %>"]').attr("selected", "selected");
     $('#DebridApiKey').val("<%- config.DebridApiKey || '' %>");
+    $('#TMDBApiKey').val("<%- config.TMDBApiKey || '' %>");
+
+    // Dynamic debrid api key
+    document.getElementById("DebridProvider").addEventListener("change", function (event) {
+      const selectedService = event.target.value;
+      const apiKeyLink = document.getElementById("apiKeyLink");
+
+      if (selectedService === "RealDebrid") {
+        apiKeyLink.href = "https://real-debrid.com/apitoken";
+      } else if (selectedService === "DebridLink") {
+        apiKeyLink.href = "https://debrid-link.com/webapp/apikey";
+      } else if (selectedService === "AllDebrid") {
+        apiKeyLink.href = "https://alldebrid.com/apikeys";
+      } else if (selectedService === "Premiumize") {
+        apiKeyLink.href = "https://premiumize.me/account";
+      }
+    });
+
+    // Dropdown multiselect
+    let expanded = false;
+    const multiSelect = document.querySelector('.multiselect');
+
+    multiSelect.addEventListener('click', function (e) {
+      const checkboxes = document.getElementById("checkboxes");
+      if (!expanded) {
+        checkboxes.style.display = "block";
+        expanded = true;
+      } else {
+        checkboxes.style.display = "none";
+        expanded = false;
+      }
+      e.stopPropagation();
+    }, true)
+
+    document.addEventListener('click', function (e) {
+      if (expanded) {
+        checkboxes.style.display = "none";
+        expanded = false;
+      }
+    }, false)
 
     installLink.onclick = () => {
       return mainForm.reportValidity()
