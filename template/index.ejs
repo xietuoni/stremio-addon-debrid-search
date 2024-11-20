@@ -190,11 +190,11 @@
       width: 100%;
     }
 
-    .selectBox {
+    .select-box {
       position: relative;
     }
 
-    .overSelect {
+    .over-select {
       position: absolute;
       left: 0;
       right: 0;
@@ -275,22 +275,26 @@
       </div>
 
       <div class="form-element">
-        <div class="label-to-top">Additional languages (requires TMDB API KEY)</div>
+        <div class="label-to-top"> Languages (requires TMDB API KEY) </div>
         <div class="multiselect">
-          <div class="selectBox">
+          <div class="select-box">
             <select class="full-width">
-              <option>Additional languages</option>
+              <option id="dropdown-text">Languages</option>
             </select>
-            <div class="overSelect"></div>
+            <div class="over-select"></div>
           </div>
           <div id="checkboxes">
             <div>
-              <input type="checkbox" id="one" />
-              <label for="one"> First checkbox</label>
+              <input type="checkbox" id="lang-en-US" />
+              <label for="lang-en-US"> en-US - English (United States) </label>
             </div>
             <div>
-              <input type="checkbox" id="two" />
-              <label for="two"> Second checkbox</label>
+              <input type="checkbox" id="lang-zh-CN" />
+              <label for="lang-zh-CN"> zh-CN - Chinese (Mandarin) </label>
+            </div>
+            <div>
+              <input type="checkbox" id="lang-ja-JP" />
+              <label for="lang-ja-JP"> ja-JP - Japanese </label>
             </div>
           </div>
         </div>
@@ -310,6 +314,13 @@
     $('#DebridProvider option[value="<%- config.DebridProvider %>"]').attr("selected", "selected");
     $('#DebridApiKey').val("<%- config.DebridApiKey || '' %>");
     $('#TMDBApiKey').val("<%- config.TMDBApiKey || '' %>");
+
+    var languages = '<%= config.languages || "" %>'
+    for (language of languages.split(',')) {
+      const id = "#lang-" + language
+      console.log(id)
+      $(id).prop("checked", true);
+    }
 
     // Dynamic debrid api key
     document.getElementById("DebridProvider").addEventListener("change", function (event) {
@@ -331,6 +342,25 @@
     let expanded = false;
     const multiSelect = document.querySelector('.multiselect');
 
+    function removePrefix(str, prefix) {
+      if (str.startsWith(prefix)) {
+        return str.slice(prefix.length);
+      }
+      return str;
+    }
+
+    function checkArray() {
+      return $(':checkbox')
+        .filter(':checked')
+        .map((_, el) => removePrefix(el.id, "lang-"))
+        .get()
+        .join(",");
+    }
+
+    function updateDropdown() {
+      $('#dropdown-text').text(checkArray());
+    }
+
     multiSelect.addEventListener('click', function (e) {
       const checkboxes = document.getElementById("checkboxes");
       if (!expanded) {
@@ -343,13 +373,6 @@
       e.stopPropagation();
     }, true)
 
-    document.addEventListener('click', function (e) {
-      if (expanded) {
-        checkboxes.style.display = "none";
-        expanded = false;
-      }
-    }, false)
-
     installLink.onclick = () => {
       return mainForm.reportValidity()
     }
@@ -359,19 +382,38 @@
     }
 
     const updateLink = () => {
-      const config = Object.fromEntries(new FormData(mainForm))
-      if (isValidConfig(config)) {
-        installLink.href = 'stremio://' + window.location.host + '/' + encodeURIComponent(JSON.stringify(config)) + '/manifest.json'
-      } else {
-        installLink.href = '#'
+      const debridProvider = document.getElementById("DebridProvider")?.value;
+      const debridApiKey = document.getElementById("DebridApiKey")?.value;
+      const TMDBApiKey = document.getElementById("TMDBApiKey")?.value;
+
+      const config = {
+        "DebridProvider": debridProvider,
+        "DebridApiKey": debridApiKey,
+        "TMDBApiKey": TMDBApiKey,
+        "languages": checkArray()
       }
+
+      Object.fromEntries(new FormData(mainForm))
+      var link;
+      if (isValidConfig(config)) {
+        link = 'stremio://' + window.location.host + '/' + encodeURIComponent(JSON.stringify(config)) + '/manifest.json'
+      } else {
+        link = '#'
+      }
+      console.log(link)
+      installLink.href = link
     }
+
+    $(':checkbox').change(function () {
+      updateDropdown()
+      updateLink()
+    });
+
     mainForm.onchange = updateLink
 
-    if (typeof updateLink === 'function')
-      updateLink()
-    else
-      installLink.href = 'stremio://' + window.location.host + '/manifest.json'
+    updateDropdown()
+    updateLink()
+
   </script>
 </body>
 
