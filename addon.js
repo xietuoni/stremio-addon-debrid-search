@@ -14,6 +14,9 @@ builder.defineCatalogHandler((args) => {
         const debugArgs = structuredClone(args)
         if (args.config?.DebridApiKey)
             debugArgs.config.DebridApiKey = '*'.repeat(args.config.DebridApiKey.length)
+        if (args.config?.TMDBApiKey)
+            debugArgs.config.TMDBApiKey = '*'.repeat(args.config.TMDBApiKey.length)
+
         console.log("Request for catalog with args: " + JSON.stringify(debugArgs))
 
         // Request to Debrid Search
