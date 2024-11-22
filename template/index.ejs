@@ -353,12 +353,11 @@
       return $(':checkbox')
         .filter(':checked')
         .map((_, el) => removePrefix(el.id, "lang-"))
-        .get()
-        .join(",");
+        .get();
     }
 
     function updateDropdown() {
-      $('#dropdown-text').text(checkArray());
+      $('#dropdown-text').text(checkArray().join(","));
     }
 
     multiSelect.addEventListener('click', function (e) {

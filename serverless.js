@@ -13,7 +13,6 @@ import ejs from 'ejs';
 const router = new Router();
 
 router.get('/', (_, res) => {
-    console.log("TEST")
     res.redirect('/configure')
 })
 
@@ -94,7 +93,7 @@ function handleError(err, res) {
 export default function (req, res) {
     router(req, res, function (err) {
         console.log("ERROR")
-        console.log(JSON.stringify(err))
+        console.log(err)
         res.statusCode = 404;
         res.end();
     });
