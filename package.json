@@ -1,5 +1,5 @@
 {
-	"name": "debrid-search-fork",
+	"name": "debrid-search-fork2",
 	"version": "0.2.0",
 	"description": "Stremio Addon to search downloads and torrents in your Debrid cloud",
 	"main": "server.js",
